@@ -73,10 +73,10 @@
                         layer.msg("图片太大");
                         return;
                     }
-                    if (img_num >= maxCount) {
-                        img_num = 9;
+                    if (img_num > maxCount) {
+                        img_num = maxCount;
                         $('#img_url_btn_box').css('display', 'none');
-                        layer.msg("最多只能选择9张图片");
+                        layer.msg("最多只能选择"+maxCount+'张图片');
                         break;
                     }
                     if (url) {
