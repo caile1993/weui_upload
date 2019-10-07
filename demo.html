@@ -53,7 +53,7 @@
         let img_num = 0;
         let flieTypes = ['image/jpg', 'image/jpeg', 'image/png', 'image/gif'];
         let maxSize = 3 * 1024 * 1024;
-        let tmpl = '<li class="weui-uploader__file" id="#ImgID#" style="background-image:url(#url#)"></li>',
+        let tmpl = '<li class="weui-uploader__file" id="#imgId#" style="background-image:url(#url#)"></li>',
             $gallery = $("#gallery"), $galleryImg = $("#galleryImg"),
             $uploaderInput = $("#uploaderInput"),
             $uploaderFiles = $("#uploaderFiles")
@@ -103,7 +103,7 @@
                 } else {
                     src = e.target.result;
                 }
-                $uploaderFiles.append($(tmpl.replace("#ImgID#", imgId).replace('#url#', src)));
+                $uploaderFiles.append($(tmpl.replace("#imgId#", imgId).replace('#url#', src)));
             }
             imgCount();
         });
