@@ -96,7 +96,7 @@
             }
             for (let i = 0, len = files.length; i < len; i++) {
                 img_files[img_num] = files[i];
-                img_num = img_num + 1;
+                img_num++;
                 let file = files[i];
                 if (url) {
                     src = url.createObjectURL(file);
@@ -121,7 +121,7 @@
         $(".weui-gallery__del").click(function () {
             $uploaderFiles.find("li").eq(index).remove();
             img_files.splice(index, 1);
-            img_num = img_num - 1;
+            img_num--;
             imgCount();
 
         });
