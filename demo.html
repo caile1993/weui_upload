@@ -49,86 +49,98 @@
     <script>
         $(function () {
             let img_files = [];
-            let maxCount = 9;
-            let img_num = 0;
-            let flieTypes = ['image/jpg', 'image/jpeg', 'image/png', 'image/gif'];
-            let maxSize = 3 * 1024 * 1024;
-            let tmpl = '<li class="weui-uploader__file" id="#ImgID#" style="background-image:url(#url#)"></li>',
-                $gallery = $("#gallery"), $galleryImg = $("#galleryImg"),
-                $uploaderInput = $("#uploaderInput"),
-                $uploaderFiles = $("#uploaderFiles")
-                ;
-            $uploaderInput.on("change", function (e) {
-                var src, url = window.URL || window.webkitURL || window.mozURL, files = e.target.files;
-                for (let i = 0, len = files.length; i < len; i++) {
-                    img_files[img_num] = files[i];
-                    let file = files[i];
-                    let imgID = genGUID();
-                    img_num++;
-                    if (flieTypes.indexOf(file.type) === -1) {
-                        layer.msg("该类型不允许上传");
-                        return;
-                    }
-                    if (file.size > maxSize) {
-                        layer.msg("图片太大");
-                        return;
-                    }
-                    if (img_num > maxCount) {
-                        img_num = maxCount;
-                        $('#img_url_btn_box').css('display', 'none');
-                        layer.msg("最多只能选择"+maxCount+'张图片');
-                        break;
-                    }
-                    if (url) {
-                        src = url.createObjectURL(file);
+        let maxCount = 3;
+        let img_num = 0;
+        let flieTypes = ['image/jpg', 'image/jpeg', 'image/png', 'image/gif'];
+        let maxSize = 3 * 1024 * 1024;
+        let tmpl = '<li class="weui-uploader__file" id="#ImgID#" style="background-image:url(#url#)"></li>',
+            $gallery = $("#gallery"), $galleryImg = $("#galleryImg"),
+            $uploaderInput = $("#uploaderInput"),
+            $uploaderFiles = $("#uploaderFiles")
+        ;
+        $uploaderInput.on("change", function (e) {
+            let src, url = window.URL || window.webkitURL || window.mozURL, files = e.target.files;
+            let img_count = img_num + files.length;
+            let imgId = randId();
 
-                    } else {
-                        src = e.target.result;
-                    }
-                    $uploaderFiles.append($(tmpl.replace('#url#', src).replace('#ImgID#', imgID)));
-
+            $.each(files, function (i, t) {
+                //大小判断
+                if (t.size > maxSize) {
+                    layer.open({
+                        content: "图片太大了",
+                        skin: "msg",
+                        time: 2
+                    });
+                    files = [];
+                    return false;
                 }
-                if (img_num >= maxCount) {
-
-                    $('#img_url_btn_box').css('display', 'none');
+                //类型判断
+                if (flieTypes.indexOf(t.type) === -1) {
+                    layer.open({
+                        content: "不支持该类型",
+                        skin: "msg",
+                        time: 2
+                    });
+                    files = [];
+                    return false;
                 }
-
-                $('#img_info').text(img_num + '/' + maxCount);
-
-                uploaderInput.value = "";
             });
-
-            //查看图片
-            let index;
-            $uploaderFiles.on("click", "li", function () {
-                index = $(this).index();
-                $galleryImg.attr("style", this.getAttribute("style"));
-                $gallery.fadeIn(100);
-            });
-            $gallery.on("click", function () {
-                $gallery.fadeOut(100);
-            });
-
-            // 删除图片
-            $(".weui-gallery__del").click(function () {
-
-                $uploaderFiles.find("li").eq(index).remove();
-                img_files.splice(index, 1);
-                img_num--;
-                $('#img_info').text(img_num + '/' + maxCount);
-                if (img_num < maxCount) {
-                    $('#img_url_btn_box').css('display', '');
+            //数量判断
+            if (img_count > maxCount) {
+                layer.open({
+                    content: "不能超过" + maxCount + "张",
+                    skin: "msg",
+                    time: 2
+                });
+                return false;
+            }
+            for (let i = 0, len = files.length; i < len; i++) {
+                img_files[img_num] = files[i];
+                img_num = img_num + 1;
+                let file = files[i];
+                if (url) {
+                    src = url.createObjectURL(file);
+                } else {
+                    src = e.target.result;
                 }
-                uploaderInput.value = "";
-            });
-        })
+                $uploaderFiles.append($(tmpl.replace("#ImgID#", imgId).replace('#url#', src)));
+            }
+            imgCount();
+        });
+        //查看图片
+        let index;
+        $uploaderFiles.on("click", "li", function () {
+            index = $(this).index();
+            $galleryImg.attr("style", this.getAttribute("style"));
+            $gallery.fadeIn(100);
+        });
+        $gallery.on("click", function () {
+            $gallery.fadeOut(100);
+        });
+        // 删除图片
+        $(".weui-gallery__del").click(function () {
+            $uploaderFiles.find("li").eq(index).remove();
+            img_files.splice(index, 1);
+            img_num = img_num - 1;
+            imgCount();
 
-        //生成guid
-        function genGUID() {
-            var G1 = (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1) + (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
-            var G2 = (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1) + (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
-            return (G1 + G2);
+        });
+
+        //图片上传记录数量
+        function imgCount() {
+            $('#img_info').text(img_num + '/' + maxCount);
+            if (img_num >= maxCount) {
+                $('.weui-uploader__input-box').hide();
+            } else {
+                $('.weui-uploader__input-box').show();
+            }
         }
+
+        //生成随机id
+        function randId() { // 生成10-12位不等的字符串
+            return Math.random().toString(36).slice(2); // 截取小数点后的字符串
+        }            
+        });
     </script>
 </body>
 
